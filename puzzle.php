@@ -6,12 +6,14 @@ require_once 'vendor/autoload.php';
 exec('which pdftk', $output, $havePdftk);
 if (0 !== $havePdftk) {
     echo 'Pdftk is not installed', PHP_EOL;
-    exit(1);
 }
 // Verify if pdfgrep is installed
 exec('which pdfgrep', $output, $havePdfgrep);
 if (0 !== $havePdfgrep) {
     echo 'Pdfgrep is not installed', PHP_EOL;
+}
+// Exit if libraries are not installed
+if ((bool) $havePdftk || (bool) $havePdfgrep) {
     exit(1);
 }
 
