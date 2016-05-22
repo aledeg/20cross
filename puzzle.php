@@ -6,11 +6,13 @@ require_once 'vendor/autoload.php';
 exec('which pdftk', $output, $havePdftk);
 if (0 !== $havePdftk) {
     echo 'Pdftk is not installed', PHP_EOL;
+    echo 'On Debian distributions, run sudo apt-get install pdftk', PHP_EOL;
 }
 // Verify if pdfgrep is installed
 exec('which pdfgrep', $output, $havePdfgrep);
 if (0 !== $havePdfgrep) {
     echo 'Pdfgrep is not installed', PHP_EOL;
+    echo 'On Debian distributions, run sudo apt-get install pdfgrep', PHP_EOL;
 }
 // Exit if libraries are not installed
 if ((bool) $havePdftk || (bool) $havePdfgrep) {
