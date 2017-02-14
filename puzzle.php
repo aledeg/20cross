@@ -38,9 +38,10 @@ if (!is_array($inputDates)) {
 foreach ($inputDates as $inputDate) {
     $date = new \DateTime($inputDate);
     $formattedDate = $date->format('Ymd');
+    $formattedYear = $date->format('Y');
 
     // Download from website
-    $src = @fopen(sprintf('http://pdf.20mn.fr/2016/quotidien/%s_PAR.pdf?1', $formattedDate), 'r');
+    $src = @fopen(sprintf('http://pdf.20mn.fr/%s/quotidien/%s_LIL.pdf?1', $formattedYear, $formattedDate), 'r');
     if (!$src) {
         continue;
     }
