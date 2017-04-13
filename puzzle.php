@@ -54,7 +54,7 @@ foreach ($inputDates as $inputDate) {
     $pageNumber = $splitedValue[0];
 
     // Extract the page we need
-    exec(sprintf('pdftk paper.pdf cat %s output page%s.pdf', $pageNumber, $formattedDate));
+    getPage('paper.pdf', $pageNumber, $formattedDate);
 }
 
 if (!glob('page*.pdf')) {
@@ -87,3 +87,14 @@ if (!array_key_exists('keep', $options)) {
     }
 }
 
+function getPage($filename, $pageNumber, $date) {
+    $im = new Imagick();
+    $im->setResolution(600,600);
+    $im->readimage(sprintf('%s[%s]', $filename, $pageNumber - 1));
+    $im->cropImage(3220, 4720, 1970, 260);
+    $im->setImagePage(0, 0, 0, 0);
+    $im->setImageFormat('pdf');
+    $im->writeImage(sprintf('page%s.pdf', $date));
+    $im->clear();
+    $im->destroy();
+}
