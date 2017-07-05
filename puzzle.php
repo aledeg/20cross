@@ -34,11 +34,11 @@ if (array_key_exists('issue', $options)) {
 if (!is_array($inputDates)) {
     $inputDates = [$inputDates];
 }
+$inputDates = array_map(function ($a) {return new \DateTime($a);}, $inputDates);
 
 foreach ($inputDates as $inputDate) {
-    $date = new \DateTime($inputDate);
-    $formattedDate = $date->format('Ymd');
-    $formattedYear = $date->format('Y');
+    $formattedDate = $inputDate->format('Ymd');
+    $formattedYear = $inputDate->format('Y');
 
     // Download from website
     $src = @fopen(sprintf('http://pdf.20mn.fr/%s/quotidien/%s_LIL.pdf?1', $formattedYear, $formattedDate), 'r');
@@ -66,8 +66,9 @@ exec('pdftk page*.pdf cat output mots.pdf');
 
 // Send email containing the page
 if (array_key_exists('to', $options)) {
+    $formattedDates = array_map(function($a){return $a->format('d-m-Y');}, $inputDates);
     $message = Swift_Message::newInstance()
-        ->setSubject(sprintf('Puzzle - %s', $formattedDate))
+        ->setSubject(sprintf('Puzzle - %s', implode(' - ', $formattedDates)))
         ->setFrom([
             'alexis.degrugillier@stadline.com' => 'Alexis',
         ])
