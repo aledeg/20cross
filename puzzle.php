@@ -88,11 +88,17 @@ if (!array_key_exists('keep', $options)) {
 }
 
 function getPage($filename, $pageNumber, $date) {
+    $width = 3220;
+    $height = 4720;
+    $resizeFactor = 4;
+
     $im = new Imagick();
     $im->setResolution(600,600);
     $im->readimage(sprintf('%s[%s]', $filename, $pageNumber - 1));
-    $im->cropImage(3220, 4720, 1970, 260);
+    $im->cropImage($width, $height, 1970, 260);
     $im->setImagePage(0, 0, 0, 0);
+    $im->resizeimage($width / $resizeFactor, $height / $resizeFactor, imagick::FILTER_LANCZOS, 1);
+    $im->setimagecolorspace(imagick::COLORSPACE_GRAY);
     $im->setImageFormat('pdf');
     $im->writeImage(sprintf('page%s.pdf', $date));
     $im->clear();
