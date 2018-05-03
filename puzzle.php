@@ -49,7 +49,7 @@ foreach ($inputDates as $inputDate) {
     stream_copy_to_stream($src, $dest);
 
     // Find which page we need
-    $value = exec('pdfgrep -i -n \'mots fl.*ch.*s N°\' paper.pdf');
+    $value = exec('pdfgrep -i -n \'horoscope\' paper.pdf');
     $splitedValue = explode(':', $value);
     $pageNumber = $splitedValue[0];
 
