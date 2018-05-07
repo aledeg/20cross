@@ -50,8 +50,7 @@ foreach ($inputDates as $inputDate) {
 
     // Find which page we need
     $value = exec('pdfgrep -i -n \'horoscope\' paper.pdf');
-    $splitedValue = explode(':', $value);
-    $pageNumber = $splitedValue[0];
+    list($pageNumber,) = explode(':', $value);
 
     // Extract the page we need
     exec(sprintf('pdftk paper.pdf cat %s output page%s.pdf', $pageNumber, $formattedDate));
@@ -74,7 +73,7 @@ if (array_key_exists('to', $options)) {
         ])
         ->setTo($options['to'])
         ->attach(Swift_Attachment::fromPath('mots.pdf'));
-    
+
     $transport = Swift_MailTransport::newInstance();
     $mailer = Swift_Mailer::newInstance($transport);
     $mailer->send($message);
