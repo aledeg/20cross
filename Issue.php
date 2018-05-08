@@ -10,6 +10,9 @@ class Issue {
     /** @var string */
     private $alias;
 
+    /** @var string */
+    private $level;
+
     public function __construct(string $date)
     {
         $this->date = new \DateTime($date);
@@ -39,14 +42,23 @@ class Issue {
         return sprintf('%s%s', $this->alias, $this->page);
     }
 
+    public function getLevel(): string
+    {
+        return $this->level;
+    }
+
     public function __toString(): string
     {
         return $this->date->format('d-m-Y');
     }
 
-    public function setExtractionInfo(int $index, int $page)
+    public function setExtractionInfo(int $index, int $page, string $content)
     {
         $this->page = $page;
         $this->alias = chr($index + 65);
+
+        preg_match('/Horoscope\s+Mots.+\d{4,}\s+(?P<theme>.+)/', $content, $matches);
+
+        $this->level = trim($matches['theme']);
     }
 }

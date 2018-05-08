@@ -37,6 +37,10 @@ if (!is_array($inputDates)) {
 }
 $issues = array_map(function ($a) {return new Issue($a);}, $inputDates);
 
+$fileAliases = '';
+$pageAliases = '';
+$messageBody = '';
+
 foreach ($issues as $index => $issue) {
     // Download from website
     $src = @fopen($issue->getURL(), 'r');
@@ -47,24 +51,28 @@ foreach ($issues as $index => $issue) {
     stream_copy_to_stream($src, $dest);
 
     // Find which page we need
-    $value = exec(sprintf('pdfgrep -i -n \'horoscope\' %s', $issue->getFilename()));
-    list($pageNumber,) = explode(':', $value);
-    $issue->setExtractionInfo($index, $pageNumber);
+    $value = exec(sprintf('pdfgrep -n \'Horoscope\' %s', $issue->getFilename()));
+    list($pageNumber,$content) = explode(':', $value);
+    $issue->setExtractionInfo($index, $pageNumber, $content);
+
+    // Generating strings for later use
+    $fileAliases .= ' ' . $issue->getFileAlias();
+    $pageAliases .= ' ' . $issue->getPageAlias();
+    $messageBody .= sprintf(" - %s : %s\n", $issue, $issue->getLevel());
 }
 
 // Generate the final pdf file
-$fileAliases = array_reduce($issues, function($carry, $item) {
-    return sprintf('%s %s', $carry, $item->getFileAlias());
-}, '');
-$pageAliases = array_reduce($issues, function($carry, $item) {
-    return sprintf('%s %s', $carry, $item->getPageAlias());
-}, '');
 exec(sprintf('pdftk %s cat %s output mots.pdf', $fileAliases, $pageAliases));
 
-// Send email containing the page
+if (!file_exists('mots.pdf')) {
+    exit(1);
+}
+
+// Send email containing the page(s)
 if (array_key_exists('to', $options)) {
     $message = Swift_Message::newInstance()
         ->setSubject(sprintf('Puzzle - %s', implode(' - ', $issues)))
+        ->addPart($messageBody, 'text/plain')
         ->setFrom([
             'alexis.degrugillier@stadline.com' => 'Alexis',
         ])
