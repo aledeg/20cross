@@ -1,6 +1,7 @@
 <?php
 
 require_once 'vendor/autoload.php';
+require_once 'Issue.php';
 
 // Verify if pdftk is installed
 exec('which pdftk', $output, $havePdftk);
@@ -34,40 +35,36 @@ if (array_key_exists('issue', $options)) {
 if (!is_array($inputDates)) {
     $inputDates = [$inputDates];
 }
-$inputDates = array_map(function ($a) {return new \DateTime($a);}, $inputDates);
+$issues = array_map(function ($a) {return new Issue($a);}, $inputDates);
 
-foreach ($inputDates as $inputDate) {
-    $formattedDate = $inputDate->format('Ymd');
-    $formattedYear = $inputDate->format('Y');
-
+foreach ($issues as $index => $issue) {
     // Download from website
-    $src = @fopen(sprintf('http://pdf.20mn.fr/%s/quotidien/%s_LIL.pdf?1', $formattedYear, $formattedDate), 'r');
+    $src = @fopen($issue->getURL(), 'r');
     if (!$src) {
         continue;
     }
-    $dest = fopen('paper.pdf', 'w');
+    $dest = fopen($issue->getFilename(), 'w');
     stream_copy_to_stream($src, $dest);
 
     // Find which page we need
-    $value = exec('pdfgrep -i -n \'horoscope\' paper.pdf');
+    $value = exec(sprintf('pdfgrep -i -n \'horoscope\' %s', $issue->getFilename()));
     list($pageNumber,) = explode(':', $value);
-
-    // Extract the page we need
-    exec(sprintf('pdftk paper.pdf cat %s output page%s.pdf', $pageNumber, $formattedDate));
+    $issue->setExtractionInfo($index, $pageNumber);
 }
 
-if (!glob('page*.pdf')) {
-    exit(1);
-}
-
-// Combine all pages
-exec('pdftk page*.pdf cat output mots.pdf');
+// Generate the final pdf file
+$fileAliases = array_reduce($issues, function($carry, $item) {
+    return sprintf('%s %s', $carry, $item->getFileAlias());
+}, '');
+$pageAliases = array_reduce($issues, function($carry, $item) {
+    return sprintf('%s %s', $carry, $item->getPageAlias());
+}, '');
+exec(sprintf('pdftk %s cat %s output mots.pdf', $fileAliases, $pageAliases));
 
 // Send email containing the page
 if (array_key_exists('to', $options)) {
-    $formattedDates = array_map(function($a){return $a->format('d-m-Y');}, $inputDates);
     $message = Swift_Message::newInstance()
-        ->setSubject(sprintf('Puzzle - %s', implode(' - ', $formattedDates)))
+        ->setSubject(sprintf('Puzzle - %s', implode(' - ', $issues)))
         ->setFrom([
             'alexis.degrugillier@stadline.com' => 'Alexis',
         ])
