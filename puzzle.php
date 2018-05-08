@@ -86,7 +86,11 @@ if (array_key_exists('to', $options)) {
 
 // Delete files
 if (!array_key_exists('keep', $options)) {
-    $pdfs = glob('*.pdf');
+    if (array_key_exists('to', $options)) {
+        $pdfs = glob('*.pdf');
+    } else {
+        $pdfs = glob('page*.pdf');
+    }
     foreach ($pdfs as $pdf) {
         unlink($pdf);
     }
