@@ -49,7 +49,7 @@ class Issue {
 
     public function __toString(): string
     {
-        return $this->date->format('d-m-Y');
+        return sprintf('%s (%s)', $this->date->format('d-m-Y'), $this->level);
     }
 
     public function setExtractionInfo(int $index, int $page, string $content)

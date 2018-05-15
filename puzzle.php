@@ -58,7 +58,7 @@ foreach ($issues as $index => $issue) {
     // Generating strings for later use
     $fileAliases .= ' ' . $issue->getFileAlias();
     $pageAliases .= ' ' . $issue->getPageAlias();
-    $messageBody .= sprintf(" - %s : %s\n", $issue, $issue->getLevel());
+    $messageBody .= sprintf(" - %s\n", $issue);
 }
 
 // Generate the final pdf file
